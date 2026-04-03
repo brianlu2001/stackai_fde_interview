@@ -1,0 +1,30 @@
+# ── Web framework ─────────────────────────────────────────────────────────────
+fastapi==0.115.12
+uvicorn[standard]==0.34.0
+python-multipart==0.0.20      # multipart/form-data file uploads
+
+# ── Configuration & validation ────────────────────────────────────────────────
+pydantic==2.11.2
+pydantic-settings==2.8.1      # reads settings from .env via BaseSettings
+
+# ── Database ───────────────────────────────────────────────────────────────────
+sqlalchemy==2.0.40            # async ORM — swap DATABASE_URL for PostgreSQL
+aiosqlite==0.21.0             # async SQLite driver
+# asyncpg==0.30.0             # uncomment for PostgreSQL
+
+# ── PDF extraction ────────────────────────────────────────────────────────────
+pymupdf==1.25.4               # fitz — fast, robust page-by-page extraction
+
+# ── Numerical / vector math ───────────────────────────────────────────────────
+numpy==2.2.4                  # cosine similarity only — NOT a search library
+
+# ── Mistral AI ─────────────────────────────────────────────────────────────────
+mistralai==1.5.0              # official Mistral Python SDK
+
+# ── Async file I/O ────────────────────────────────────────────────────────────
+aiofiles==24.1.0
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest==8.3.5
+pytest-asyncio==0.26.0
+httpx==0.28.1                 # async HTTP client for FastAPI TestClient
