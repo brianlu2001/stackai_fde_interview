@@ -1,0 +1,91 @@
+"""
+core/embedding/embedder.py — Mistral embedding wrapper
+
+Responsibilities:
+    - Wrap the Mistral `mistral-embed` API in a thin async interface.
+    - Batch input texts to respect Mistral's per-request limits and to
+      reduce the total number of API calls for large document ingestions.
+    - Return embeddings as a numpy float32 matrix for immediate use by the
+      vector store.
+
+Why mistral-embed?
+    - Required by the assignment (Mistral API only).
+    - 1024-dimensional dense embeddings; strong multilingual performance.
+
+Batching:
+    Mistral allows up to 512 texts per embedding call.  We default to a
+    batch size of 128 to stay well within limits and to keep individual
+    payloads small.  For a 500-char chunk that is comfortably within limits.
+
+Production note:
+    For very high ingestion throughput, consider parallelising batch calls
+    with asyncio.gather.  Kept sequential here to avoid rate-limit errors
+    during the demo.
+"""
+
+import numpy as np
+from mistralai import Mistral
+
+from app.config import get_settings
+
+settings = get_settings()
+
+# ── Mistral client (module-level singleton) ───────────────────────────────────
+# Instantiated once; the API key is read from settings (env var), never
+# from a hard-coded string.
+_client = Mistral(api_key=settings.mistral_api_key)
+
+# Maximum texts per Mistral embedding API call.
+_BATCH_SIZE = 128
+
+
+async def embed_texts(texts: list[str]) -> np.ndarray:
+    """
+    Embed a list of strings using Mistral's embedding model.
+
+    Texts are sent in batches of _BATCH_SIZE to avoid oversized payloads.
+    Results are concatenated into a single (N, 1024) float32 numpy array.
+
+    Args:
+        texts: List of strings to embed.  May be empty (returns empty array).
+
+    Returns:
+        numpy array of shape (len(texts), embedding_dim) with dtype float32.
+
+    Raises:
+        MistralAPIException: Propagated from the Mistral SDK on API errors.
+    """
+    if not texts:
+        return np.empty((0, 1024), dtype=np.float32)
+
+    all_embeddings: list[list[float]] = []
+
+    for batch_start in range(0, len(texts), _BATCH_SIZE):
+        batch = texts[batch_start : batch_start + _BATCH_SIZE]
+
+        response = await _client.embeddings.create_async(
+            model=settings.mistral_embed_model,
+            inputs=batch,
+        )
+        # response.data is a list of EmbeddingObject, each with a .embedding list
+        batch_embeddings = [obj.embedding for obj in response.data]
+        all_embeddings.extend(batch_embeddings)
+
+    return np.array(all_embeddings, dtype=np.float32)
+
+
+async def embed_query(text: str) -> np.ndarray:
+    """
+    Embed a single query string.
+
+    Convenience wrapper around embed_texts() for the common single-string
+    case.  Returns a 1-D array of shape (embedding_dim,).
+
+    Args:
+        text: The query string to embed.
+
+    Returns:
+        1-D numpy float32 array of shape (1024,).
+    """
+    matrix = await embed_texts([text])
+    return matrix[0]  # shape (1024,)
