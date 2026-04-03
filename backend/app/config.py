@@ -5,7 +5,7 @@ All configuration is read from environment variables (or a local .env file).
 The API key and other secrets are NEVER hardcoded here.
 
 pydantic-settings validates every field at startup and raises immediately
-if a required value (like MISTRAL_API_KEY) is missing, so the server
+if a required value (like OPENAI_API_KEY) is missing, so the server
 never starts in a broken state.
 
 Production note:
@@ -31,14 +31,14 @@ class Settings(BaseSettings):
         extra="ignore",           # silently ignore unknown env vars
     )
 
-    # ── Mistral AI ──────────────────────────────────────────────────────────
+    # ── OpenAI ──────────────────────────────────────────────────────────────
     # Key is kept in env / secret manager — never in source code.
-    mistral_api_key: str
+    openai_api_key: str
 
     # Model assignments by task (cheap/fast for classification, large for generation)
-    mistral_embed_model: str = "mistral-embed"
-    mistral_small_model: str = "mistral-small-latest"   # intent, rewrite, rerank
-    mistral_large_model: str = "mistral-large-latest"   # final answer generation
+    openai_embed_model: str = "text-embedding-3-small"  # 1536-dim, fast, cost-effective
+    openai_small_model: str = "gpt-4o-mini"             # intent, rewrite, rerank
+    openai_large_model: str = "gpt-4o"                  # final answer generation
 
     # ── Database ────────────────────────────────────────────────────────────
     # SQLite by default — swap to PostgreSQL with one line in .env:

@@ -19,7 +19,7 @@ pymupdf==1.25.4               # fitz — fast, robust page-by-page extraction
 numpy==2.2.4                  # cosine similarity only — NOT a search library
 
 # ── Mistral AI ─────────────────────────────────────────────────────────────────
-mistralai==1.5.0              # official Mistral Python SDK
+openai==1.75.0                # official OpenAI Python SDK (async-native)
 
 # ── Async file I/O ────────────────────────────────────────────────────────────
 aiofiles==24.1.0

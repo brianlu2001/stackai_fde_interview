@@ -40,12 +40,12 @@ import json
 import re
 from enum import Enum
 
-from mistralai import Mistral
+from openai import AsyncOpenAI
 
 from app.config import get_settings
 
 settings = get_settings()
-_client = Mistral(api_key=settings.mistral_api_key)
+_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 class Intent(str, Enum):
@@ -116,8 +116,8 @@ async def detect_intent(query: str) -> Intent:
     # Delimit the user query to resist prompt injection
     user_message = f"Classify this query:\n<query>{query}</query>"
 
-    response = await _client.chat.complete_async(
-        model=settings.mistral_small_model,
+    response = await _client.chat.completions.create(
+        model=settings.openai_small_model,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": user_message},

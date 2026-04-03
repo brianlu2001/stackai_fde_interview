@@ -5,7 +5,7 @@ This is NOT a third-party vector database.  It is a plain numpy matrix
 stored on disk, with cosine similarity implemented from scratch.
 
 Design:
-    - All embeddings live in a single float32 matrix: shape (N, 1024).
+    - All embeddings live in a single float32 matrix: shape (N, 1536).
     - A parallel JSON list maps each row index → chunk UUID.
     - On startup the matrix and index are loaded from disk into memory.
     - Writes (add / delete) update the in-memory state and flush to disk.
@@ -17,7 +17,7 @@ Cosine similarity:
 Why not FAISS / Annoy / Hnswlib?
     - Assignment constraint: no external search libraries.
     - Exact cosine search is O(N·D).  For thousands of chunks this is
-      fast enough (< 5 ms on a laptop for 10k × 1024 floats).
+      fast enough (< 5 ms on a laptop for 10k × 1536 floats).
 
 Production upgrade path:
     At millions of vectors, replace this class with a Qdrant / Weaviate
@@ -65,8 +65,8 @@ class VectorStore:
         self.store_dir.mkdir(parents=True, exist_ok=True)
 
         # In-memory state — loaded from disk on init.
-        # _matrix shape: (N, embedding_dim) or (0, 1024) when empty.
-        self._matrix: np.ndarray = np.empty((0, 1024), dtype=np.float32)
+        # _matrix shape: (N, embedding_dim) or (0, 1536) when empty.
+        self._matrix: np.ndarray = np.empty((0, 1536), dtype=np.float32)
         # Parallel list: _chunk_ids[i] is the chunk UUID for row i.
         self._chunk_ids: list[str] = []
 
@@ -143,7 +143,7 @@ class VectorStore:
             cid not in chunk_ids_to_remove for cid in self._chunk_ids
         ]
         if not any(keep_mask):
-            self._matrix = np.empty((0, self._matrix.shape[1] if self._matrix.ndim == 2 else 1024), dtype=np.float32)
+            self._matrix = np.empty((0, self._matrix.shape[1] if self._matrix.ndim == 2 else 1536), dtype=np.float32)
             self._chunk_ids = []
         else:
             keep_indices = [i for i, keep in enumerate(keep_mask) if keep]

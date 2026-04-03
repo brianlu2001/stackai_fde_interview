@@ -33,12 +33,12 @@ import json
 import re
 from dataclasses import dataclass
 
-from mistralai import Mistral
+from openai import AsyncOpenAI
 
 from app.config import get_settings
 
 settings = get_settings()
-_client = Mistral(api_key=settings.mistral_api_key)
+_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 @dataclass
@@ -103,8 +103,8 @@ async def rerank_chunks(
         f"Chunks to score:\n{chunk_blocks}"
     )
 
-    response = await _client.chat.complete_async(
-        model=settings.mistral_small_model,
+    response = await _client.chat.completions.create(
+        model=settings.openai_small_model,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": user_message},

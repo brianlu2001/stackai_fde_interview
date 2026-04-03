@@ -19,12 +19,12 @@ Citation threshold:
     This prevents the model from hallucinating when the context is weak.
 """
 
-from mistralai import Mistral
+from openai import AsyncOpenAI
 
 from app.config import get_settings
 
 settings = get_settings()
-_client = Mistral(api_key=settings.mistral_api_key)
+_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 
 async def generate_answer(system_prompt: str, user_message: str) -> str:
@@ -41,8 +41,8 @@ async def generate_answer(system_prompt: str, user_message: str) -> str:
     Raises:
         MistralAPIException: Propagated from the SDK on API errors.
     """
-    response = await _client.chat.complete_async(
-        model=settings.mistral_large_model,
+    response = await _client.chat.completions.create(
+        model=settings.openai_large_model,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message},

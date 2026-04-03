@@ -31,12 +31,12 @@ Security note:
     for a user to override the rewriting instruction via prompt injection.
 """
 
-from mistralai import Mistral
+from openai import AsyncOpenAI
 
 from app.config import get_settings
 
 settings = get_settings()
-_client = Mistral(api_key=settings.mistral_api_key)
+_client = AsyncOpenAI(api_key=settings.openai_api_key)
 
 _SYSTEM_PROMPT = """\
 You are a search query optimiser for a document retrieval system.
@@ -68,8 +68,8 @@ async def rewrite_query(query: str) -> str:
     """
     user_message = f"Rewrite for search:\n<query>{query}</query>"
 
-    response = await _client.chat.complete_async(
-        model=settings.mistral_small_model,
+    response = await _client.chat.completions.create(
+        model=settings.openai_small_model,
         messages=[
             {"role": "system", "content": _SYSTEM_PROMPT},
             {"role": "user", "content": user_message},
