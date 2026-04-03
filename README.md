@@ -249,7 +249,7 @@ Remove a document and all its chunks from the knowledge base.
 
 | Feature | Implementation |
 |---|---|
-| **Citation threshold** | If top chunk cosine similarity < 0.35, returns "insufficient evidence" instead of generating |
+| **Citation threshold** | If top chunk cosine similarity < 0.2, returns "insufficient evidence" instead of generating |
 | **Answer shaping** | Query pattern matching selects from factual / list / explanation / comparison prompt templates |
 | **Hallucination filter** | Each sentence in the answer is embedded and checked against retrieved chunks; unsupported sentences are removed |
 | **Query refusal** | PII, medical, and legal queries are detected and refused with appropriate messaging |
